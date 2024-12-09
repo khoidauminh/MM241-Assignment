@@ -28,11 +28,6 @@ class WorstFit(Policy):
         self.stock_indices = []
         self.prods_indices = []
 
-        # Biến để giữ đánh giá
-        self.rate_on = False
-        self.results = []
-        self.current_trim_loss = None
-
     def get_action(self, observation, info):
 
         list_stock = observation["stocks"]
@@ -40,21 +35,13 @@ class WorstFit(Policy):
 
         # Stock mới
         if info["filled_ratio"] == 0.0:
-    
-            if self.rate_on and self.current_trim_loss is not None:
-                self.results.append(self.current_trim_loss)
-                ave = sum(self.results)/len(self.results)
-                print("Trim losses: ", self.results)
-                print("Average trim loss so far: ", ave)
-                print("Average fill rate so far: ", 1.0 - ave)
-            
             self.prepare(list_prods, list_stock)
 
         self.current_trim_loss = info["trim_loss"]
 
         # Thử đặt sản phẩm vào stock
         action = self.get_core_action(list_prods, list_stock)
-        
+
         return action
 
     def prepare(self, list_prods, list_stock):
@@ -301,10 +288,8 @@ class ColumnGeneration(Policy):
 class Policy2210xxx(Policy):
     def __init__(self, policy_id = 1):
         assert policy_id in [1, 2]
-        
+
         self.policy = WorstFit() if policy_id == 1 else ColumnGeneration()
-    
+
     def get_action(self, observation, info):
         return self.policy.get_action(observation, info)
-    
-    
